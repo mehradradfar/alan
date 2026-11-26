@@ -80,7 +80,7 @@ function seed(){
   ];
   const products=defs.map((d,i)=>({id:d.id,name:d.name,cat:d.cat,img:d.img,price:d.price,cost:Math.round(d.price*.6/1000)*1000,code:d.code,specs:d.specs,desc:'',attrs:d.attrs,variants:mkVariants(d.code,d.attrs,d.stocks),
     ch:{web:{on:true,price:null},dk:{on:i!==5,price:null},snapp:{on:d.snapp,price:null}},created:now-(10-i)*DAY*3}));
-  S={v:1,onboarded:false,user:{phone:'',name:'نیلا رضایی',shop:'پوشاک نیلا'},
+  S={v:2,onboarded:false,user:{phone:'',name:'نیلا رضایی',shop:'پوشاک نیلا'},
     settings:{theme:'light',notif:true,low:3,autoStock:true},
     channels:{web:{connected:true,status:'ok',strategy:'s_base',last:now-36e5*2},dk:{connected:true,status:'ok',strategy:'s_dk',last:now-36e5*2},snapp:{connected:true,status:'expired',strategy:'s_mk',last:now-DAY*3}},
     strategies:[{id:'s_base',name:'قیمت پایه',pct:0,round:0},{id:'s_dk',name:'دیجی‌کالا ۶٪ بالاتر',pct:6,round:1000},{id:'s_mk',name:'مارکت‌پلیس ۴٪ بالاتر',pct:4,round:1000}],
@@ -89,11 +89,8 @@ function seed(){
     sub:{plan:'pro',left:24,total:30,cycle:'m'},
     team:[{id:'t1',name:'نیلا رضایی',role:'مالک',phone:'۰۹۱۲ ۳۴۵ ۶۷۸۹',me:true},{id:'t2',name:'سارا محمدی',role:'فروشنده',phone:'۰۹۳۵ ۱۱۲ ۲۲۳۳'}],
     cart:{items:[],channel:'store',buyer:'',discount:0,extra:0},seq:1000,lastPull:0};
-  // synced snapshot = current, then age a few values to create pending changes
+  // synced snapshot = current: nothing is pending until the user changes something
   products.forEach(p=>{S.synced[p.id]={};connectedCh().forEach(c=>{if(p.ch[c].on)S.synced[p.id][c]=snapOf(p,c);});});
-  const p1=products[0];connectedCh().forEach(c=>{S.synced.p1[c].stock[p1.variants[0].id]+=2;});
-  S.synced.p2.dk.price-=50000;
-  if(S.synced.p3.snapp)S.synced.p3.snapp.price-=30000;
   // 30 days of sales
   const chW=[['store',30],['insta',22],['dk',18],['web',14],['telegram',8],['snapp',5],['whatsapp',3]];
   const pickCh=()=>{let x=r()*100;for(const [c,w] of chW){if((x-=w)<0)return c;}return 'store';};

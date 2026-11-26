@@ -506,3 +506,12 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:none}
 /* + button: glass like the tab bar */
 .tb-fab{background:var(--glass);color:var(--text);backdrop-filter:blur(22px) saturate(190%);-webkit-backdrop-filter:blur(22px) saturate(190%);box-shadow:inset 0 1px 0 var(--glass-edge),0 8px 28px rgba(0,0,0,.12),0 0 0 .5px var(--hl)}
 @media (prefers-reduced-motion:reduce){.bottom.slidein{animation:none}}
+
+/* ===== PDP: small square product image ===== */
+.phero{display:flex;justify-content:center;padding-top:76px;padding-bottom:2px}
+.pimg{width:168px;height:168px;border-radius:28px;overflow:hidden;background:var(--fill);box-shadow:0 10px 30px rgba(0,0,0,.08),0 0 0 .5px var(--hl);transform-origin:50% 0;will-change:transform,opacity;animation:pimgIn .55s var(--spring) both}
+.pimg img{width:100%;height:100%;object-fit:cover;display:block}
+.pimg .noimg svg{width:36px;height:36px}
+@keyframes pimgIn{from{transform:scale(.86);opacity:0}}
+.pdt.center{text-align:center;padding-top:14px}
+@media (prefers-reduced-motion:reduce){.pimg{animation:none}}

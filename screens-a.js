@@ -114,8 +114,8 @@ function ProductScreen({pid}){
   const tops=Object.entries(bv).filter(([vid])=>V_(p,vid)).sort((x,y)=>y[1].q-x[1].q).slice(0,3);
   return `<div class="pnav" id="pnav"><div class="top-safe"></div><div class="nav"><button class="gbtn" data-act="back" aria-label="بازگشت">${ic('chevR')}</button><div class="t">${esc(p.name)}</div><button class="gbtn" data-act="pmore|${pid}" style="justify-self:end" aria-label="بیشتر">${ic('dots')}</button></div></div>
   <div class="scroll no-tab" data-scrollnav>
-    <div class="hero">${p.img?`<img src="${p.img}" alt="">`:`<div class="noimg">${ic('image')}<span>عکس ندارد</span></div>`}<i class="hshade"></i></div>
-    <div class="pdt"><div class="muted small">${esc(catName(p.cat))}</div><h1 class="ptitle">${esc(p.name)}</h1><div class="muted small">${subl}</div></div>
+    <div class="phero"><div class="pimg">${p.img?`<img src="${p.img}" alt="">`:`<div class="noimg">${ic('image')}</div>`}</div></div>
+    <div class="pdt center"><div class="muted small">${esc(catName(p.cat))}</div><h1 class="ptitle">${esc(p.name)}</h1><div class="muted small">${subl}</div></div>
     ${multi?`<div class="utabs" id="vtabs">${p.variants.map(x=>`<button class="${x.id===v.id?'on':''}" data-act="vsel|${pid}|${x.id}">${esc(x.opts.join('، '))}</button>`).join('')}</div>`:''}
     <div class="list">
       ${li({title:'کد کالا (SKU)',val:`<span class="ltr">${esc(v.sku)}</span>`,act:'variants|'+pid})}
@@ -132,12 +132,12 @@ function ProductScreen({pid}){
 }
 ProductScreen.after=(el,{pid})=>{UI._pdpChg=UI._pdpChg||{};UI._pdpChg[pid]=!!$('.bottom',el);
   const t=$('#vtabs .on',el);if(t){const r=t.parentNode;r.scrollLeft=t.offsetLeft+t.offsetWidth/2-r.clientWidth/2;}
-  const sc=$('[data-scrollnav]',el),nav=$('#pnav',el),hero=$('.hero',el);if(!sc||!nav||!hero)return;
-  const img=hero.querySelector('img,.noimg'),shade=hero.querySelector('.hshade');
-  const navH=nav.offsetHeight,H=hero.offsetHeight,span=Math.max(1,H-navH);hero.style.top=(-span)+'px';
-  let raf=0;const f=()=>{raf=0;const y=sc.scrollTop;const c=Math.min(Math.max(y,0),span),k=c/span;
-    if(img)img.style.transform=y<0?`scale(${(1+(-y)/H*1.4).toFixed(4)})`:`translateY(${(c*.5).toFixed(1)}px) scale(${(1+k*.08).toFixed(4)})`;
-    shade.style.opacity=Math.max(0,(k-.4)/.6).toFixed(3);nav.classList.toggle('solid',k>.97);};
+  const sc=$('[data-scrollnav]',el),nav=$('#pnav',el),im=$('.pimg',el),hero=$('.phero',el),tt=$('.pdt .ptitle',el);if(!sc||!nav||!im)return;
+  hero.style.paddingTop=(nav.offsetHeight+6)+'px';
+  let raf=0;const f=()=>{raf=0;const y=sc.scrollTop;const end=tt.offsetTop+tt.offsetHeight-nav.offsetHeight;
+    if(y<0){im.style.transform=`scale(${(1+(-y)/300).toFixed(3)})`;im.style.opacity=1;}
+    else{const k=Math.min(1,y/140);im.style.transform=`translateY(${(y*.15).toFixed(1)}px) scale(${(1-k*.3).toFixed(3)})`;im.style.opacity=(1-k).toFixed(3);}
+    nav.classList.toggle('solid',y>end);};
   sc.addEventListener('scroll',()=>{if(!raf)raf=requestAnimationFrame(f);},{passive:true});f();};
 A.vsel=(pid,vid)=>{UI.vsel[pid]=vid;haptic();refresh();};
 A.vselTop=(pid,vid)=>{UI.vsel[pid]=vid;haptic();refresh();const top=UI.stack[UI.stack.length-1];const sc=top&&$('[data-scrollnav]',top.el);if(sc){const tb=$('#vtabs',top.el)||$('.pdt',top.el);sc.scrollTo({top:Math.max(0,tb.offsetTop-90),behavior:'smooth'});}};
