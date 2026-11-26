@@ -153,6 +153,11 @@ function topUpSales(){
       added.push({id:uid(),t:st,channel:ch,items,discount:Math.random()<0.12?50000:0,extra:0,buyer:'',status:'done',demo:true});
     }
   }
+  // never leave a day in the range empty (testing wants today and yesterday to have data)
+  for(let ds=sod(from);ds<=now;ds+=DAY){const de=ds+DAY;const lo=Math.max(from,ds),hi=Math.min(now,de);if(hi-lo<6e4)continue;
+    const has=S.sales.some(s=>s.t>=ds&&s.t<de)||added.some(s=>s.t>=ds&&s.t<de);if(has)continue;
+    const n=2+Math.floor(Math.random()*3);for(let k=0;k<n;k++){const st=lo+Math.floor(Math.random()*(hi-lo));const p=withImg[Math.floor(Math.random()*withImg.length)];const v=p.variants[Math.floor(Math.random()*p.variants.length)];const ch=pick();
+      added.push({id:uid(),t:st,channel:ch,items:[{pid:p.id,vid:v.id,qty:1,price:OCH[ch]&&S.channels[ch]&&S.channels[ch].connected?(vPrice(p,v,ch)||p.price):p.price}],discount:0,extra:0,buyer:'',status:'done',demo:true});}}
   added.sort((a,b)=>a.t-b.t).forEach(s=>s.no=++S.seq);
   if(added.length){S.sales=S.sales.concat(added).sort((a,b)=>b.t-a.t);}
   S.genAt=now;save();return added.length;
