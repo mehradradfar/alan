@@ -93,6 +93,7 @@ function regCh(){Object.keys(S.channels).forEach(k=>{if(!OCH[k]&&EXTRA_CH[k])OCH
 document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const t=e.target.closest&&e.target.closest('[data-enter]');if(!t)return;e.preventDefault();const [n,...a]=t.dataset.enter.split('|');A[n]&&A[n](...a,t,e);});
 function boot(){S=load();
   if(S&&S.v===1){/* v1 demo shipped with pre-made pending changes; start clean */S.products.forEach(p=>{S.synced[p.id]={};Object.keys(S.channels).forEach(c=>{if(S.channels[c].connected&&OCH[c]&&p.ch[c]&&p.ch[c].on)S.synced[p.id][c]=snapOf(p,c);});});S.v=2;save();}
-  if(!S||S.v!==2){seed();save();}regCh();applyTheme();shell();if(typeof mountCtl==='function')mountCtl();switchTab('home');if(!S.onboarded)showOnboarding();
+  if(!S||S.v!==2){seed();save();}topUpSales();regCh();applyTheme();shell();if(typeof mountCtl==='function')mountCtl();switchTab('home');if(!S.onboarded)showOnboarding();
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&topUpSales()&&!UI.ob)refresh();});
   try{if('serviceWorker' in navigator&&location.protocol==='https:'&&window.top===window.self)navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}}
 boot();

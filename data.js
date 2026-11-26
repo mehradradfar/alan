@@ -109,6 +109,7 @@ function seed(){
   sales.sort((a,b)=>a.t-b.t).forEach(s=>s.no=++S.seq);
   sales[sales.length-9].status='cancelled';
   S.sales=sales.reverse();
+  S.genAt=now;
   S.notifs=[
     {id:uid(),t:now-18e5,type:'err',title:'ارسال به اسنپ‌شاپ انجام نشد',body:'اتصال منقضی شده. یک بار دوباره وصل شوید.',read:false,act:'channel|snapp'},
     {id:uid(),t:now-36e5*3,type:'warn',title:'موجودی تی‌شرت سفید XL تمام شد',body:'برای فروش دوباره، موجودی را به‌روز کنید.',read:false,act:'product|p1'},
@@ -122,4 +123,37 @@ function seed(){
   ];
   S.versions.forEach(v=>v.prices=Object.fromEntries(S.products.map(p=>[p.id,p.price])));
   return S;
+}
+
+/* ---------- keep demo sales flowing ----------
+   The seed covers the 30 days before it was created. When the demo is opened
+   on later days (or later the same day) we add random sales for the time that
+   has passed, so today and yesterday are never empty. Stock is not touched, so
+   nothing becomes "pending" without the user changing it. */
+const DEMO_CH=[['store',30],['insta',22],['dk',18],['web',14],['telegram',8],['snapp',5],['whatsapp',3]];
+function topUpSales(){
+  if(!S||!S.products.length)return 0;
+  const now=Date.now();
+  if(!S.genAt){const last=S.sales.reduce((m,s)=>Math.max(m,s.t),0);S.genAt=last||now;}
+  let from=Math.max(S.genAt,now-35*DAY);if(from>=now)return 0;
+  const pick=()=>{let x=Math.random()*100;for(const [c,w] of DEMO_CH){if((x-=w)<0)return c;}return 'store';};
+  const withImg=S.products.filter(p=>p.variants.length);const added=[];
+  // walk hour by hour through opening hours (9:00–22:00); each hour has a chance of a sale
+  let h=new Date(from);h.setMinutes(0,0,0);
+  for(let t=h.getTime();t<now;t+=36e5){
+    const hr=new Date(t).getHours();if(hr<9||hr>=22)continue;
+    const busy=hr>=17&&hr<21?0.65:0.42;
+    const n=Math.random()<busy?(Math.random()<0.18?2:1):0;
+    for(let k=0;k<n;k++){
+      const st=t+Math.floor(Math.random()*36e5);if(st<=from||st>now)continue;
+      const ch=pick();const items=[];const ni=Math.random()<0.28?2:1;
+      for(let j=0;j<ni;j++){const p=withImg[Math.floor(Math.random()*withImg.length)];const v=p.variants[Math.floor(Math.random()*p.variants.length)];
+        const price=OCH[ch]&&S.channels[ch]&&S.channels[ch].connected?(vPrice(p,v,ch)||p.price):p.price;
+        items.push({pid:p.id,vid:v.id,qty:Math.random()<0.2?2:1,price});}
+      added.push({id:uid(),t:st,channel:ch,items,discount:Math.random()<0.12?50000:0,extra:0,buyer:'',status:'done',demo:true});
+    }
+  }
+  added.sort((a,b)=>a.t-b.t).forEach(s=>s.no=++S.seq);
+  if(added.length){S.sales=S.sales.concat(added).sort((a,b)=>b.t-a.t);}
+  S.genAt=now;save();return added.length;
 }
